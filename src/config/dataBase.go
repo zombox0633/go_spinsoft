@@ -11,9 +11,8 @@ import (
 )
 
 type DatabaseType struct {
-	Client     *mongo.Client
-	DBName     *mongo.Database
-	Collection *mongo.Collection
+	Client *mongo.Client
+	DBName *mongo.Database
 }
 
 var DB *DatabaseType
@@ -36,15 +35,11 @@ func InitDatabase(ctx context.Context, cfg *ConfigType) error {
 		return fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
 
-	log.Println(cfg.CollectionName)
-
 	database := client.Database(cfg.DataBaseName)
-	collection := database.Collection(cfg.CollectionName)
 
 	DB = &DatabaseType{
-		Client:     client,
-		DBName:     database,
-		Collection: collection,
+		Client: client,
+		DBName: database,
 	}
 
 	log.Println("Successfully connected to MongoDB")
