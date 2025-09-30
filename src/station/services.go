@@ -58,5 +58,6 @@ func (s *stationServiceType) ImportFromURL(ctx context.Context, url string) (*St
 	return &StationImportResponse{
 		Success:       true,
 		ImportedCount: len(stations),
+		Message:       "Import completed successfully",
 	}, nil
 }

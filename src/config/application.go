@@ -39,7 +39,7 @@ func NewApplication(cfg *ConfigType) *ApplicationType {
 
 	middleware.SetupCorsMiddleware(app)
 
-	setRoutes(app)
+	setRoutes(app, cfg.APIKey)
 
 	return application
 }

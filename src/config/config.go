@@ -20,10 +20,10 @@ func LoadConfig() *ConfigType {
 	}
 
 	return &ConfigType{
+		Port:         getEnv("PORT", "8080"),
 		MonGoURL:     getEnv("MONGO_URI", ""),
 		DataBaseName: getEnv("DB_NAME", ""),
 		APIKey:       getEnv("API_KEY", ""),
-		Port:         getEnv("PORT", "8080"),
 	}
 }
 
