@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/zombox0633/go_spinsoft/src/middleware"
@@ -27,9 +26,8 @@ func NewApplication(cfg *ConfigType) *ApplicationType {
 			log.Printf("Error: %v", err)
 
 			return c.Status(code).JSON(fiber.Map{
-				"error":     true,
-				"message":   message,
-				"timestamp": time.Now().Format(time.RFC3339),
+				"error":   true,
+				"message": message,
 			})
 		},
 	})
@@ -41,11 +39,7 @@ func NewApplication(cfg *ConfigType) *ApplicationType {
 
 	middleware.SetupCorsMiddleware(app)
 
-	application.fiber.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"message": "Hello, World!",
-		})
-	})
+	setRoutes(app)
 
 	return application
 }
