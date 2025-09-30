@@ -8,11 +8,10 @@ import (
 )
 
 type ConfigType struct {
-	Port           string
-	APIKey         string
-	MonGoURL       string
-	DataBaseName   string
-	CollectionName string
+	Port         string
+	APIKey       string
+	MonGoURL     string
+	DataBaseName string
 }
 
 func LoadConfig() *ConfigType {
@@ -21,11 +20,10 @@ func LoadConfig() *ConfigType {
 	}
 
 	return &ConfigType{
-		MonGoURL:       getEnv("MONGO_URI", ""),
-		DataBaseName:   getEnv("DB_NAME", ""),
-		CollectionName: getEnv("COLLECTION_NAME", ""),
-		APIKey:         getEnv("API_KEY", ""),
-		Port:           getEnv("PORT", "8080"),
+		MonGoURL:     getEnv("MONGO_URI", ""),
+		DataBaseName: getEnv("DB_NAME", ""),
+		APIKey:       getEnv("API_KEY", ""),
+		Port:         getEnv("PORT", "8080"),
 	}
 }
 
