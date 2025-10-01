@@ -2,6 +2,7 @@ package station
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/zombox0633/go_spinsoft/src/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -53,6 +54,7 @@ func (s *StationModel) UnmarshalJSON(data []byte) error {
 	s.ExactDistance = utils.ToInt(raw["exact_distance"])
 	s.KM = utils.ToInt(raw["km"])
 	s.Class = utils.ToInt(raw["class"])
+
 	s.Lat = utils.ToFloat64(raw["lat"])
 	s.Long = utils.ToFloat64(raw["long"])
 	s.Active = utils.ToInt(raw["active"])
@@ -60,7 +62,36 @@ func (s *StationModel) UnmarshalJSON(data []byte) error {
 	s.DualTrack = utils.ToInt(raw["dual_track"])
 	s.Comment = utils.ToString(raw["comment"])
 
-	if s.Lat != 0 && s.Long != 0 {
+	isValidCoordinates := true
+	var invalidReason string
+
+	if s.Lat < -90 || s.Lat > 90 {
+		isValidCoordinates = false
+		invalidReason = fmt.Sprintf("Invalid latitude: must be between -90 and 90")
+	}
+
+	if s.Long < -180 || s.Lat > 180 {
+		isValidCoordinates = false
+		invalidReason += fmt.Sprintf("Invalid longitude: must be between -180 and 180")
+	}
+
+	if s.Lat == 0 && s.Long == 0 {
+		isValidCoordinates = false
+		invalidReason = "Coordinates are zero (0, 0)"
+	}
+
+	if !isValidCoordinates {
+		s.Active = 0
+
+		if s.Comment == "" || s.Comment == "NULL" {
+			s.Comment = fmt.Sprintf(invalidReason)
+		} else {
+			s.Comment = fmt.Sprintf("New Comment: %s | Original Comment: %s", invalidReason, s.Comment)
+		}
+
+		s.Location = nil
+		fmt.Printf("Invalid coordinates for station: id %v - %s - %s\n", s.StationID, s.Name, invalidReason)
+	} else {
 		s.Location = &GeoJSONPointModel{
 			Type:        "Point",
 			Coordinates: []float64{s.Long, s.Lat}, // x, y
