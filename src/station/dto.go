@@ -23,5 +23,5 @@ type NearestStationResponse struct {
 	EnName   string  `json:"en_name"`
 	Lat      float64 `json:"lat"`
 	Long     float64 `json:"long"`
-	Distance float64 `json:"distance"`
+	Distance float64 `json:"distance_km"`
 }
