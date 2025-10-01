@@ -7,6 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type GeoJSONPointModel struct {
+	Type        string    `bson:"type" json:"type"`
+	Coordinates []float64 `bson:"coordinates" json:"coordinates"`
+}
+
 type StationModel struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	StationID     int                `bson:"id" json:"station_id"`
@@ -23,6 +28,7 @@ type StationModel struct {
 	Class         int                `bson:"class" json:"class"`
 	Lat           float64            `bson:"lat" json:"lat"`
 	Long          float64            `bson:"long" json:"long"`
+	Location      *GeoJSONPointModel `bson:"location,omitempty" json:"coordinates,omitempty"`
 	Active        int                `bson:"active" json:"active"`
 	Giveway       int                `bson:"giveway" json:"giveway"`
 	DualTrack     int                `bson:"dual_track" json:"dual_track"`
@@ -53,6 +59,13 @@ func (s *StationModel) UnmarshalJSON(data []byte) error {
 	s.Giveway = utils.ToInt(raw["giveway"])
 	s.DualTrack = utils.ToInt(raw["dual_track"])
 	s.Comment = utils.ToString(raw["comment"])
+
+	if s.Lat != 0 && s.Long != 0 {
+		s.Location = &GeoJSONPointModel{
+			Type:        "Point",
+			Coordinates: []float64{s.Long, s.Lat}, // x, y
+		}
+	}
 
 	return nil
 }
