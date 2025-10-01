@@ -11,6 +11,7 @@ import (
 
 type StationService interface {
 	ImportFromURL(ctx context.Context, url string) (*StationImportResponse, error)
+	NearestStation(ctx context.Context, data NearestStationRequest) (*NearestStationResponse, error)
 }
 
 type stationServiceType struct {
@@ -60,4 +61,21 @@ func (s *stationServiceType) ImportFromURL(ctx context.Context, url string) (*St
 		ImportedCount: len(stations),
 		Message:       "Import completed successfully",
 	}, nil
+}
+
+func (s *stationServiceType) NearestStation(ctx context.Context, data NearestStationRequest) (*NearestStationResponse, error) {
+	if data.Lat < -90 || data.Lat > 90 {
+		return nil, fmt.Errorf("invalid latitude: must be between -90 and 90")
+	}
+
+	if data.Long < -180 || data.Long > 180 {
+		return nil, fmt.Errorf("invalid longitude: must be between -90 and 90")
+	}
+
+	station, err := s.repo.FindNearestStation(ctx, data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find nearest station: %w", err)
+	}
+
+	return station, nil
 }
