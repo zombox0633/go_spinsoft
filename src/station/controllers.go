@@ -40,6 +40,7 @@ func (c *StationControllerType) PostImportStationsURL(ctx *fiber.Ctx) error {
 func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
 	latStr := ctx.Query("lat")
 	longStr := ctx.Query("long")
+	limitStr := ctx.Query("limit", "1")
 
 	if latStr == "" || longStr == "" {
 		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
@@ -64,9 +65,18 @@ func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
 		})
 	}
 
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"error":   "Invalid limit",
+		})
+	}
+
 	req := NearestStationRequest{
-		Lat:  lat,
-		Long: long,
+		Lat:   lat,
+		Long:  long,
+		Limit: limit,
 	}
 
 	result, err := c.service.NearestStation(ctx.Context(), req)

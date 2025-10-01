@@ -12,7 +12,7 @@ import (
 
 type StationRepository interface {
 	InsertMany(ctx context.Context, stations []StationModel) error
-	FindNearestStation(ctx context.Context, data NearestStationRequest) (*NearestStationResponse, error)
+	FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error)
 	CreateGeoIndex(ctx context.Context) error
 }
 
@@ -46,7 +46,7 @@ func (r *stationRepositoryType) InsertMany(ctx context.Context, stations []Stati
 	return nil
 }
 
-func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data NearestStationRequest) (*NearestStationResponse, error) {
+func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error) {
 	searchPoint := bson.M{
 		"type":        "Point",
 		"coordinates": []float64{data.Long, data.Lat},
@@ -63,7 +63,7 @@ func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data Nea
 				"location": bson.M{"$exists": true},
 			},
 		}}},
-		{{Key: "$limit", Value: 1}},
+		{{Key: "$limit", Value: data.Limit}},
 	}
 
 	cursor, err := r.collection.Aggregate(ctx, pipeline)
@@ -73,8 +73,12 @@ func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data Nea
 	defer cursor.Close(ctx)
 
 	var results []struct {
-		StationModel `bson:",inline"`
-		Distance     float64 `bson:"distance"`
+		StationID int     `bson:"id"`
+		Name      string  `bson:"name"`
+		EnName    string  `bson:"en_name"`
+		Lat       float64 `bson:"lat"`
+		Long      float64 `bson:"long"`
+		Distance  float64 `bson:"distance"`
 	}
 
 	if err := cursor.All(ctx, &results); err != nil {
@@ -85,20 +89,21 @@ func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data Nea
 		return nil, fmt.Errorf("no stations found within 100km")
 	}
 
-	station := results[0]
+	responses := make([]NearestStationResponse, len(results))
+	for i, station := range results {
+		distanceKm := math.Round((station.Distance/1000)*1000) / 1000
 
-	distanceKm := math.Round((station.Distance/1000)*1000) / 1000
-
-	response := &NearestStationResponse{
-		ID:       station.StationID,
-		Name:     station.Name,
-		EnName:   station.EnName,
-		Lat:      station.Lat,
-		Long:     station.Long,
-		Distance: distanceKm,
+		responses[i] = NearestStationResponse{
+			ID:       station.StationID,
+			Name:     station.Name,
+			EnName:   station.EnName,
+			Lat:      station.Lat,
+			Long:     station.Long,
+			Distance: distanceKm,
+		}
 	}
 
-	return response, nil
+	return responses, nil
 }
 
 func (r *stationRepositoryType) CreateGeoIndex(ctx context.Context) error {
