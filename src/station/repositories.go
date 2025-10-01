@@ -87,7 +87,7 @@ func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data Nea
 
 	station := results[0]
 
-	distanceKm := math.Round((station.Distance/1000)*100) / 100
+	distanceKm := math.Round((station.Distance/1000)*1000) / 1000
 
 	response := &NearestStationResponse{
 		ID:       station.StationID,
