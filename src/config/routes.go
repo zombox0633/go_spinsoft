@@ -7,17 +7,21 @@ import (
 )
 
 func setRoutes(app *fiber.App, apiKey string) {
-	DB := DB.DBName
+	if DB == nil || DB.DBName == nil {
+		panic("Database not initialized")
+	}
+
+	database := DB.DBName
 	api := app.Group("/api")
 
 	api.Use(middleware.APIKeyMiddleware(apiKey))
 
 	api.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
-			"message": "Hello, World!",
+			"message": "Hello World! 😺",
 		})
 	})
 
 	// Setup routes
-	station.StationRoutes(api, DB)
+	station.StationRoutes(api, database)
 }

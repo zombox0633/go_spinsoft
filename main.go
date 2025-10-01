@@ -31,6 +31,7 @@ func main() {
 		<-c
 
 		log.Println("Gracefully shutting down...")
+		cancel()
 
 		// Shutdown server
 		if err := app.Shutdown(); err != nil {
@@ -43,8 +44,6 @@ func main() {
 		if config.DB != nil {
 			if err := config.DB.Close(shutdownCtx); err != nil {
 				log.Printf("Database shutdown error: %v", err)
-			} else {
-				log.Println("Database connection closed")
 			}
 		}
 

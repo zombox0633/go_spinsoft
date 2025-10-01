@@ -31,9 +31,12 @@ func (r *stationRepositoryType) InsertMany(ctx context.Context, stations []Stati
 		data[i] = station
 	}
 
-	if _, err := r.collection.InsertMany(ctx, data); err != nil {
+	result, err := r.collection.InsertMany(ctx, data)
+
+	if err != nil {
 		return fmt.Errorf("failed to insert stations: %w", err)
 	}
 
+	fmt.Printf("Successfully inserted %d stations\n", len(result.InsertedIDs))
 	return nil
 }
