@@ -22,7 +22,7 @@ func InitDatabase(ctx context.Context, cfg *ConfigType) error {
 	defer cancel()
 
 	if cfg.MonGoURL == "" {
-		return fmt.Errorf("MongoDB URL is empty : check your .env file")
+		return fmt.Errorf("MongoDB URL is empty: check your .env file")
 	}
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MonGoURL))
