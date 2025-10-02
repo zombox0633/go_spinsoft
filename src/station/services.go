@@ -54,17 +54,27 @@ func (s *stationServiceType) ImportFromURL(ctx context.Context, url string) (*St
 		return nil, fmt.Errorf("failed to parse: %w", err)
 	}
 
+	invalidCoordinateCount := 0
+	for _, station := range stations {
+		if station.WasInvalidated {
+			invalidCoordinateCount++
+		}
+	}
+
 	if err := s.repo.InsertMany(ctx, stations); err != nil {
 		return &StationImportResponse{
-			Success: false,
-			Message: err.Error(),
+			Success:            false,
+			ImportedCount:      0,
+			InvalidCoordinates: invalidCoordinateCount,
+			Message:            err.Error(),
 		}, nil
 	}
 
 	return &StationImportResponse{
-		Success:       true,
-		ImportedCount: len(stations),
-		Message:       "Import completed successfully",
+		Success:            true,
+		ImportedCount:      len(stations),
+		InvalidCoordinates: invalidCoordinateCount,
+		Message:            "Import completed successfully",
 	}, nil
 }
 

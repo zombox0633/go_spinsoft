@@ -34,6 +34,8 @@ type StationModel struct {
 	Giveway       int                `bson:"giveway" json:"giveway"`
 	DualTrack     int                `bson:"dual_track" json:"dual_track"`
 	Comment       string             `bson:"comment" json:"comment"`
+
+	WasInvalidated bool `bson:"-" json:"-"`
 }
 
 func (s *StationModel) UnmarshalJSON(data []byte) error {
@@ -82,6 +84,7 @@ func (s *StationModel) UnmarshalJSON(data []byte) error {
 
 	if !isValidCoordinates {
 		s.Active = 0
+		s.WasInvalidated = true
 
 		if s.Comment == "" || s.Comment == "NULL" {
 			s.Comment = fmt.Sprintf(invalidReason)

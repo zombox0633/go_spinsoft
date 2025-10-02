@@ -16,6 +16,7 @@ func NewStationController(service StationService) *StationControllerType {
 	}
 }
 
+// ---------------------------------- PostImportStationsURL -------------------------
 func (c *StationControllerType) PostImportStationsURL(ctx *fiber.Ctx) error {
 	var req StationImportRequest
 
@@ -31,6 +32,7 @@ func (c *StationControllerType) PostImportStationsURL(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(result)
 }
 
+// ---------------------------------- Get Nearest Station -------------------------
 func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
 	latStr := ctx.Query("lat")
 	longStr := ctx.Query("long")
@@ -68,6 +70,7 @@ func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(result)
 }
 
+// ---------------------------------- Get Nearest Station Pagination -------------------------
 func (c *StationControllerType) GetNearestStationPagination(ctx *fiber.Ctx) error {
 	latStr := ctx.Query("lat")
 	longStr := ctx.Query("long")

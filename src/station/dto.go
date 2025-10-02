@@ -6,9 +6,10 @@ type StationImportRequest struct {
 }
 
 type StationImportResponse struct {
-	Success       bool   `json:"success"`
-	ImportedCount int    `json:"imported_count"`
-	Message       string `json:"message"`
+	Success            bool   `json:"success"`
+	ImportedCount      int    `json:"imported_count"`
+	InvalidCoordinates int    `json:"invalid_coordinates"`
+	Message            string `json:"message"`
 }
 
 // Find Near Station
