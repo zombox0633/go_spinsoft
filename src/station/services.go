@@ -61,7 +61,7 @@ func (s *stationServiceType) ImportFromURL(ctx context.Context, url string) (*St
 		}
 	}
 
-	if err := s.repo.InsertMany(ctx, stations); err != nil {
+	if err := s.repo.UpsertMany(ctx, stations); err != nil {
 		return &StationImportResponse{
 			Success:            false,
 			ImportedCount:      0,

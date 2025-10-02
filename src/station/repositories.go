@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type StationRepository interface {
-	InsertMany(ctx context.Context, stations []StationModel) error
+	UpsertMany(ctx context.Context, stations []StationModel) error
 	FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationData, error)
 	FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) ([]NearestStationData, int, error)
 	CreateGeoIndex(ctx context.Context) error
@@ -28,23 +30,62 @@ func NewStationRepository(collection *mongo.Collection) StationRepository {
 }
 
 // ---------------------------------- ImportFromURL -------------------------
-func (r *stationRepositoryType) InsertMany(ctx context.Context, stations []StationModel) error {
+func (r *stationRepositoryType) UpsertMany(ctx context.Context, stations []StationModel) error {
 	if len(stations) == 0 {
 		return nil
 	}
 
-	data := make([]interface{}, len(stations))
-	for i, station := range stations {
-		data[i] = station
+	now := primitive.NewDateTimeFromTime(time.Now())
+
+	var operations []mongo.WriteModel
+	for _, station := range stations {
+		station.UpdatedAt = now
+
+		filter := bson.M{"id": station.StationID}
+
+		update := bson.M{
+			"$set": bson.M{
+				"station_code":    station.StationCode,
+				"name":            station.Name,
+				"en_name":         station.EnName,
+				"th_short":        station.ThShort,
+				"en_short":        station.EnShort,
+				"chname":          station.ChName,
+				"controldivision": station.ControlDiv,
+				"exact_km":        station.ExactKM,
+				"exact_distance":  station.ExactDistance,
+				"km":              station.KM,
+				"class":           station.Class,
+				"lat":             station.Lat,
+				"long":            station.Long,
+				"location":        station.Location,
+				"active":          station.Active,
+				"giveway":         station.Giveway,
+				"dual_track":      station.DualTrack,
+				"comment":         station.Comment,
+				"updated_at":      now,
+			},
+			"$setOnInsert": bson.M{
+				"id":         station.StationID,
+				"created_at": now,
+			},
+		}
+
+		operation := mongo.NewUpdateManyModel()
+		operation.SetFilter(filter)
+		operation.SetUpdate(update)
+		operation.SetUpsert(true)
+
+		operations = append(operations, operation)
 	}
 
-	result, err := r.collection.InsertMany(ctx, data)
-
+	result, err := r.collection.BulkWrite(ctx, operations, options.BulkWrite().SetOrdered(false))
 	if err != nil {
 		return fmt.Errorf("failed to insert stations: %w", err)
 	}
 
-	fmt.Printf("Successfully inserted %d stations\n", len(result.InsertedIDs))
+	fmt.Printf("Successfully processed %d stations: %d inserted, %d updated\n",
+		len(stations), result.UpsertedCount, result.ModifiedCount)
 	return nil
 }
 

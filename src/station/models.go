@@ -34,6 +34,8 @@ type StationModel struct {
 	Giveway       int                `bson:"giveway" json:"giveway"`
 	DualTrack     int                `bson:"dual_track" json:"dual_track"`
 	Comment       string             `bson:"comment" json:"comment"`
+	CreatedAt     primitive.DateTime `bson:"created_at" json:"created_at"`
+	UpdatedAt     primitive.DateTime `bson:"updated_at" json:"updated_at"`
 
 	WasInvalidated bool `bson:"-" json:"-"`
 }
