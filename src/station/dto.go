@@ -26,3 +26,23 @@ type NearestStationResponse struct {
 	Long     float64 `json:"long"`
 	Distance float64 `json:"distance_km"`
 }
+
+// Pagination
+type NearestStationPaginationRequest struct {
+	Lat      float64 `json:"lat" validate:"required"`
+	Long     float64 `json:"long" validate:"required"`
+	Page     int     `json:"page,omitempty"`
+	PageSize int     `json:"page_size,omitempty"`
+}
+
+type NearestStationPaginationResponse struct {
+	Success    bool                     `json:"success"`
+	Page       int                      `json:"page"`
+	PageSize   int                      `json:"page_size"`
+	PagesItems int                      `json:"pages_items"`
+	ItemStart  int                      `json:"item_start"`
+	ItemEnd    int                      `json:"item_end"`
+	TotalPages int                      `json:"total_pages"`
+	TotalItems int                      `json:"total_items"`
+	Data       []NearestStationResponse `json:"data"`
+}

@@ -28,4 +28,5 @@ func StationRoutes(api fiber.Router, DB *mongo.Database) {
 
 	stationGroup.Post("/import", stationController.PostImportStationsURL)
 	stationGroup.Get("/nearest", stationController.GetNearestStation)
+	stationGroup.Get("/nearest-pagination", stationController.GetNearestStationPagination)
 }
