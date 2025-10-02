@@ -76,8 +76,8 @@ func (s *stationServiceType) FindNearestStation(ctx context.Context, data Neares
 		return nil, fmt.Errorf("invalid longitude: must be between -90 and 90")
 	}
 
-	if data.Limit < 0 || data.Limit > 1000 {
-		return nil, fmt.Errorf("invalid limit: must be between 0 and 1000")
+	if data.Limit < 0 || data.Limit > 100 {
+		return nil, fmt.Errorf("invalid limit: must be between 0 and 100")
 	}
 
 	responses, err := s.repo.FindNearestStation(ctx, data)
