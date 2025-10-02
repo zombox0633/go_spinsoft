@@ -14,7 +14,7 @@ import (
 
 type StationService interface {
 	ImportFromURL(ctx context.Context, url string) (*StationImportResponse, error)
-	FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error)
+	FindNearestStation(ctx context.Context, data NearestStationRequest) (*NearestStationResponse, error)
 	FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) (*NearestStationPaginationResponse, error)
 }
 
@@ -69,7 +69,7 @@ func (s *stationServiceType) ImportFromURL(ctx context.Context, url string) (*St
 }
 
 // ---------------------------------- Find Nearest Station -------------------------
-func (s *stationServiceType) FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error) {
+func (s *stationServiceType) FindNearestStation(ctx context.Context, data NearestStationRequest) (*NearestStationResponse, error) {
 	if err := utils.ValidateCoordinates(data.Lat, data.Long); err != nil {
 		return nil, err
 	}
@@ -78,12 +78,17 @@ func (s *stationServiceType) FindNearestStation(ctx context.Context, data Neares
 		return nil, fmt.Errorf("invalid limit: must be between 1 and 100")
 	}
 
-	responses, err := s.repo.FindNearestStation(ctx, data)
+	stationData, err := s.repo.FindNearestStation(ctx, data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find nearest station: %w", err)
 	}
 
-	return responses, nil
+	response := &NearestStationResponse{
+		Success: true,
+		Data:    stationData,
+	}
+
+	return response, nil
 }
 
 // ---------------------------------- Find Nearest Station Pagination -------------------------

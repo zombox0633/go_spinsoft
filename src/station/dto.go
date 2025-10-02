@@ -19,6 +19,11 @@ type NearestStationRequest struct {
 }
 
 type NearestStationResponse struct {
+	Success bool                 `json:"success"`
+	Data    []NearestStationData `json:"data"`
+}
+
+type NearestStationData struct {
 	ID       int     `json:"id"`
 	Name     string  `json:"name"`
 	EnName   string  `json:"en_name"`
@@ -36,13 +41,13 @@ type NearestStationPaginationRequest struct {
 }
 
 type NearestStationPaginationResponse struct {
-	Success    bool                     `json:"success"`
-	Page       int                      `json:"page"`
-	PageSize   int                      `json:"page_size"`
-	PagesItems int                      `json:"pages_items"`
-	ItemStart  int                      `json:"item_start"`
-	ItemEnd    int                      `json:"item_end"`
-	TotalPages int                      `json:"total_pages"`
-	TotalItems int                      `json:"total_items"`
-	Data       []NearestStationResponse `json:"data"`
+	Success    bool                 `json:"success"`
+	Page       int                  `json:"page"`
+	PageSize   int                  `json:"page_size"`
+	PagesItems int                  `json:"pages_items"`
+	ItemStart  int                  `json:"item_start"`
+	ItemEnd    int                  `json:"item_end"`
+	TotalPages int                  `json:"total_pages"`
+	TotalItems int                  `json:"total_items"`
+	Data       []NearestStationData `json:"data"`
 }

@@ -12,8 +12,8 @@ import (
 
 type StationRepository interface {
 	InsertMany(ctx context.Context, stations []StationModel) error
-	FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error)
-	FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) ([]NearestStationResponse, int, error)
+	FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationData, error)
+	FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) ([]NearestStationData, int, error)
 	CreateGeoIndex(ctx context.Context) error
 }
 
@@ -48,8 +48,8 @@ func (r *stationRepositoryType) InsertMany(ctx context.Context, stations []Stati
 	return nil
 }
 
-// ---------------------------------- Find NearestStation -------------------------
-func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error) {
+// ---------------------------------- Find Nearest Station -------------------------
+func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationData, error) {
 	searchPoint := bson.M{
 		"type":        "Point",
 		"coordinates": []float64{data.Long, data.Lat},
@@ -92,11 +92,11 @@ func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data Nea
 		return nil, fmt.Errorf("no stations found within 100km")
 	}
 
-	responses := make([]NearestStationResponse, len(results))
+	responses := make([]NearestStationData, len(results))
 	for i, station := range results {
 		distanceKm := math.Round((station.Distance/1000)*1000) / 1000
 
-		responses[i] = NearestStationResponse{
+		responses[i] = NearestStationData{
 			ID:       station.StationID,
 			Name:     station.Name,
 			EnName:   station.EnName,
@@ -109,7 +109,8 @@ func (r *stationRepositoryType) FindNearestStation(ctx context.Context, data Nea
 	return responses, nil
 }
 
-func (r *stationRepositoryType) FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) ([]NearestStationResponse, int, error) {
+// ---------------------------------- Find Nearest Station Pagination -------------------------
+func (r *stationRepositoryType) FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) ([]NearestStationData, int, error) {
 
 	pageSize := data.PageSize
 
@@ -184,11 +185,11 @@ func (r *stationRepositoryType) FindNearestStationPagination(ctx context.Context
 		return nil, 0, fmt.Errorf("no results returned")
 	}
 
-	responses := make([]NearestStationResponse, len(result.Data))
+	responses := make([]NearestStationData, len(result.Data))
 	for i, station := range result.Data {
 		distanceKm := math.Round((station.Distance/1000)*1000) / 1000
 
-		responses[i] = NearestStationResponse{
+		responses[i] = NearestStationData{
 			ID:       station.StationID,
 			Name:     station.Name,
 			EnName:   station.EnName,
