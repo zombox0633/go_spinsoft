@@ -12,6 +12,11 @@ type ApplicationType struct {
 	config *ConfigType
 }
 
+type ErrorResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
 func NewApplication(cfg *ConfigType) *ApplicationType {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -25,9 +30,9 @@ func NewApplication(cfg *ConfigType) *ApplicationType {
 
 			log.Printf("Error: %v", err)
 
-			return c.Status(code).JSON(fiber.Map{
-				"error":   true,
-				"message": message,
+			return c.Status(code).JSON(ErrorResponse{
+				Success: false,
+				Message: message,
 			})
 		},
 	})

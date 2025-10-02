@@ -20,21 +20,15 @@ func (c *StationControllerType) PostImportStationsURL(ctx *fiber.Ctx) error {
 	var req StationImportRequest
 
 	if err := ctx.BodyParser(&req); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   true,
-			"message": "Invalid request body",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
 	result, err := c.service.ImportFromURL(ctx.Context(), req.URL)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error":   true,
-			"message": err.Error(),
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(result)
+	return ctx.Status(fiber.StatusCreated).JSON(result)
 }
 
 func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
@@ -43,34 +37,22 @@ func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
 	limitStr := ctx.Query("limit", "1")
 
 	if latStr == "" || longStr == "" {
-		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-			"success": false,
-			"error":   "Missing required parameters",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Missing required parameters: lat and long")
 	}
 
 	lat, err := strconv.ParseFloat(latStr, 64)
 	if err != nil {
-		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid latitude",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid latitude")
 	}
 
 	long, err := strconv.ParseFloat(longStr, 64)
 	if err != nil {
-		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid longitude",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid longitude")
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid limit",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid limit")
 	}
 
 	req := NearestStationRequest{
@@ -81,10 +63,7 @@ func (c *StationControllerType) GetNearestStation(ctx *fiber.Ctx) error {
 
 	result, err := c.service.FindNearestStation(ctx.Context(), req)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   "Failed to find nearest station",
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	return ctx.Status(fiber.StatusOK).JSON(result)
 }
@@ -96,42 +75,27 @@ func (c *StationControllerType) GetNearestStationPagination(ctx *fiber.Ctx) erro
 	pageSizeStr := ctx.Query("page_size", "10")
 
 	if latStr == "" || longStr == "" {
-		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-			"success": false,
-			"error":   "Missing required parameters",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Missing required parameters: lat and long")
 	}
 
 	lat, err := strconv.ParseFloat(latStr, 64)
 	if err != nil {
-		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid latitude",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid latitude")
 	}
 
 	long, err := strconv.ParseFloat(longStr, 64)
 	if err != nil {
-		return ctx.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid longitude",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid longitude")
 	}
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid page format: must be an integer",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid page format: must be an integer")
 	}
 
 	pageSize, err := strconv.Atoi(pageSizeStr)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"error":   "Invalid page_size format: must be an integer",
-		})
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid page_size format: must be an integer")
 	}
 
 	req := NearestStationPaginationRequest{
@@ -143,10 +107,7 @@ func (c *StationControllerType) GetNearestStationPagination(ctx *fiber.Ctx) erro
 
 	result, err := c.service.FindNearestStationPagination(ctx.Context(), req)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
-			"error":   err.Error(),
-		})
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(result)

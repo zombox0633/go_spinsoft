@@ -9,17 +9,11 @@ func APIKeyMiddleware(keyValue string) fiber.Handler {
 		apiKey := c.Get("X-API-Key")
 
 		if apiKey == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error":   true,
-				"message": "API Key is required",
-			})
+			return fiber.NewError(fiber.StatusUnauthorized, "API Key is required")
 		}
 
 		if apiKey != keyValue {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error":   true,
-				"message": "Invalid API Key",
-			})
+			return fiber.NewError(fiber.StatusUnauthorized, "Invalid API Key")
 		}
 
 		return c.Next()
