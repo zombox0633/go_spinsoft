@@ -8,6 +8,8 @@ import (
 	"math"
 	"net/http"
 	"time"
+
+	"github.com/zombox0633/go_spinsoft/src/utils"
 )
 
 type StationService interface {
@@ -66,18 +68,14 @@ func (s *stationServiceType) ImportFromURL(ctx context.Context, url string) (*St
 	}, nil
 }
 
-// ---------------------------------- Find NearestStation -------------------------
+// ---------------------------------- Find Nearest Station -------------------------
 func (s *stationServiceType) FindNearestStation(ctx context.Context, data NearestStationRequest) ([]NearestStationResponse, error) {
-	if data.Lat < -90 || data.Lat > 90 {
-		return nil, fmt.Errorf("invalid latitude: must be between -90 and 90")
+	if err := utils.ValidateCoordinates(data.Lat, data.Long); err != nil {
+		return nil, err
 	}
 
-	if data.Long < -180 || data.Long > 180 {
-		return nil, fmt.Errorf("invalid longitude: must be between -90 and 90")
-	}
-
-	if data.Limit < 0 || data.Limit > 100 {
-		return nil, fmt.Errorf("invalid limit: must be between 0 and 100")
+	if data.Limit < 1 || data.Limit > 100 {
+		return nil, fmt.Errorf("invalid limit: must be between 1 and 100")
 	}
 
 	responses, err := s.repo.FindNearestStation(ctx, data)
@@ -88,13 +86,10 @@ func (s *stationServiceType) FindNearestStation(ctx context.Context, data Neares
 	return responses, nil
 }
 
+// ---------------------------------- Find Nearest Station Pagination -------------------------
 func (s *stationServiceType) FindNearestStationPagination(ctx context.Context, data NearestStationPaginationRequest) (*NearestStationPaginationResponse, error) {
-	if data.Lat < -90 || data.Lat > 90 {
-		return nil, fmt.Errorf("invalid latitude: must be between -90 and 90")
-	}
-
-	if data.Long < -180 || data.Long > 180 {
-		return nil, fmt.Errorf("invalid longitude: must be between -90 and 90")
+	if err := utils.ValidateCoordinates(data.Lat, data.Long); err != nil {
+		return nil, err
 	}
 
 	page := data.Page
@@ -102,11 +97,9 @@ func (s *stationServiceType) FindNearestStationPagination(ctx context.Context, d
 	if page < 0 {
 		return nil, fmt.Errorf("invalid page: must be greater than 0")
 	}
-	if pageSize < 0 {
-		return nil, fmt.Errorf("invalid page_size: must be greater than 0")
-	}
-	if pageSize > 100 {
-		return nil, fmt.Errorf("invalid page_size: must be less than or equal to 100")
+
+	if pageSize < 1 || pageSize > 100 {
+		return nil, fmt.Errorf("invalid page_size: must be between 1 and 100")
 	}
 
 	station, totalItems, err := s.repo.FindNearestStationPagination(ctx, data)
